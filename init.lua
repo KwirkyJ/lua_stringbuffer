@@ -10,6 +10,12 @@
 
 
 
+local stringbuffer = {_VERSION = "1.0"}
+
+local bufferobj = {}
+
+
+
 ---(StringBuffer):add(...)
 -- Add strings to the end of the buffer; can be either: 
 -- (1) one or more strings, or 
@@ -21,7 +27,7 @@
 -- its delimiter is appended at the end of all additions made by the call.
 -- @param ... One or more {Strings} 
 --            or a {Table} indexed (1..n) with optional ['delimiter'].
-local add = function(self, ...)
+bufferobj.add = function(self, ...)
     local list, delimiter, len
     list = {...}
     if type(list[1]) == 'table' then
@@ -49,7 +55,7 @@ end
 ---(StringBuffer):getString()
 -- Convert the buffer to a string literal.
 -- @return {String}
-local getString = function(self)
+bufferobj.getString = function(self)
     return table.concat(self[1])
 end
 
@@ -57,7 +63,7 @@ end
 -- Set delimiter added at end of each add() call.
 -- @param s {String} (default '')
 -- @error Raised iff provided delimiter is not a string.
-local setDelimeter = function(self, s)
+bufferobj.setDelimeter = function(self, s)
     s = s or ''
     assert(type(s) == 'string', 'delimiter must be string but was '.. type(string))
     self[2] = s
@@ -70,22 +76,19 @@ end
 -- @param delim {String} Optional delimiter to add at the end of each add() call.
 -- @error Raised if delim is not a string or nil.
 -- @return {StringBuffer}
-local new = function(delim)
+stringbuffer.new = function(delim)
     delim = delim or ''
     assert(type(delim) == 'string', 'delimiter must be string but was '.. type(string))
+    
     return {[1] = {},
             [2] = delim,
-            add = add,
-            getString = getString,
-            setDelimiter = setDelimeter,
+            add = bufferobj.add,
+            getString = bufferobj.getString,
+            setDelimiter = bufferobj.setDelimeter,
            }
 end
 
 
 
-local t = {_VERSION = "1.0",
-           new = new}
-setmetatable(t, {__call = function(self, delimiter) return new(delimiter) end})
-
-return t
+return stringbuffer
 
