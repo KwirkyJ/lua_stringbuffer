@@ -21,70 +21,70 @@ local bufferobj = {}
 -- (1) one or more strings, or 
 -- (2) a list with an optional delimiter key;
 -- first non-string element in the sequence terminates addition;
--- if provided tablehas a delimiter, then its delimiter is interspersed 
--- between the elements added from that list;
--- if the StringBuffer object has a delimiter set that is not '', then
--- its delimiter is appended at the end of all additions made by the call.
+-- if provided table has a suffix, then its suffix is add after each element
+-- added from that list;
+-- if the StringBuffer object has a suffix set that is not '', then
+-- its suffix is appended at the end of all additions made by the call.
 -- @param ... One or more {Strings} 
---            or a {Table} indexed (1..n) with optional ['delimiter'].
-bufferobj.add = function(self, ...)
-    local list, delimiter, len
+--            or a {Table} indexed (1..n) with optional ['suffix'].
+stringbuffer.add = function(bufferobj, ...)
+    local list, suffix, len
     list = {...}
     if type(list[1]) == 'table' then
         list = list[1]
     end
-    delimiter = list['delimiter']
-    len = #self[1]
+    suffix = list['suffix']
+    len = #bufferobj[1]
     for i=1, #list do
         if type(list[i]) ~= 'string' then break end
         len = len+1
-        self[1][len] = list[i]
-        if delimiter then
+        bufferobj[1][len] = list[i]
+        if suffix then
             len = len+1
-            self[1][len] = delimiter
+            bufferobj[1][len] = suffix
         end
     end
-    if delimiter then
-        self[1][#self[1]] = nil
-    end
-    if self[2] and self[2] ~= '' then
-        self[1][#self[1]+1] = self[2]
+    --if suffix then
+    --    bufferobj[1][#bufferobj[1]] = nil
+    --end
+    if bufferobj[2] and bufferobj[2] ~= '' then
+        bufferobj[1][#bufferobj[1]+1] = bufferobj[2]
     end
 end
 
 ---(StringBuffer):getString()
 -- Convert the buffer to a string literal.
 -- @return {String}
-bufferobj.getString = function(self)
-    return table.concat(self[1])
+stringbuffer.getString = function(bufferobj)
+    return table.concat(bufferobj[1])
 end
 
----(StringBuffer):setDelimiter(s)
--- Set delimiter added at end of each add() call.
+---(StringBuffer):setSuffix(s)
+-- Set a string to be appended at end of each add() call.
 -- @param s {String} (default '')
--- @error Raised iff provided delimiter is not a string.
-bufferobj.setDelimeter = function(self, s)
+-- @error Raised iff provided suffix is not a string.
+stringbuffer.setSuffix = function(bufferobj, s)
     s = s or ''
-    assert(type(s) == 'string', 'delimiter must be string but was '.. type(string))
-    self[2] = s
+    assert(type(s) == 'string', 'suffix must be string but was '.. type(string))
+    bufferobj[2] = s
 end
 
 
 
----StringBuffer.new(delim)
+---StringBuffer.new([suffix])
 -- Get a new StringBuffer table/object.
--- @param delim {String} Optional delimiter to add at the end of each add() call.
--- @error Raised if delim is not a string or nil.
+-- @param suffix {String} Optional string to add at the end of each add() call.
+-- @error Raised if suffix is not a string or nil.
 -- @return {StringBuffer}
-stringbuffer.new = function(delim)
-    delim = delim or ''
-    assert(type(delim) == 'string', 'delimiter must be string but was '.. type(string))
+stringbuffer.new = function(suffix)
+    suffix = suffix or ''
+    assert(type(suffix) == 'string', 'suffix must be string but was '.. type(suffix))
     
     return {[1] = {},
-            [2] = delim,
-            add          = bufferobj.add,
-            getString    = bufferobj.getString,
-            setDelimiter = bufferobj.setDelimeter,
+            [2] = suffix,
+            add       = stringbuffer.add,
+            getString = stringbuffer.getString,
+            setSuffix = stringbuffer.setSuffix,
            }
 end
 

@@ -4,11 +4,9 @@
 -- Version 1.0.0
 -- MIT License
 
+local lua_stringbuffer = require 'lua_stringbuffer'
 
-
-local StringBuffer = require 'lua_stringbuffer'
-
-local b, b2 = StringBuffer.new(), StringBuffer.new()
+local b, b2 = lua_stringbuffer.new(), lua_stringbuffer.new()
 
 
 
@@ -29,57 +27,57 @@ assert(b:getString() == b2:getString(), 'generated strings match')
 
 
 
----- TEST ADDITONS ---------------------------------------------------
+---- TEST ADD --------------------------------------------------------
 
-b = StringBuffer.new()
+b = lua_stringbuffer.new()
 b:add(nil)
 b:add(5)
 b:add(function() end)
 assert(b:getString() == '', 'non-string additions are ignored')
 
-b = StringBuffer.new()
+b = lua_stringbuffer.new()
 b:add('apples', 'cherries', 'peaches', 'pears', 'kumquats')
 assert(b:getString() == 'applescherriespeachespearskumquats',
        'vararg additions are concatenated by default')
 
-b = StringBuffer.new()
-b:add('apples', 'cherries', 5, 'pears', 'kumquats')
-assert(b:getString() == 'applescherries',
-       'vararg add stops at first non-string')
-
-b = StringBuffer.new()
-b:add{delimiter=', ', 'apples', 'cherries', 'peaches', 'pears', 'kumquats'}
-assert(b:getString() == 'apples, cherries, peaches, pears, kumquats',
-       'addition via table is possible, and accepts a delimiter argument')
-
-b = StringBuffer.new()
+b = lua_stringbuffer.new()
 b:add{'apples', 'cherries', 'peaches', 'pears', 'kumquats'}
 assert(b:getString() == 'applescherriespeachespearskumquats',
-       'no delimiter defaults to the empty string')
+       'addition by table')
 
-b = StringBuffer.new()
-b:add{delimiter=' ', 'apples', 'cherries', 5, 'pears', 'kumquats'}
-assert(b:getString() == 'apples cherries',
-       'non-strings will halt addition')
+b = lua_stringbuffer.new()
+b:add{suffix=', ', 'apples', 'cherries', 'peaches', 'pears', 'kumquats'}
+assert(b:getString() == 'apples, cherries, peaches, pears, kumquats, ',
+       'table-add with suffix argument')
 
-b = StringBuffer.new()
+b = lua_stringbuffer.new()
+b:add('apples', 'cherries', 5, 'pears', 'kumquats')
+assert(b:getString() == 'applescherries',
+       'non-strings halt vararg addition')
+
+b = lua_stringbuffer.new()
+b:add{suffix=' ', 'apples', 'cherries', 5, 'pears', 'kumquats'}
+assert(b:getString() == 'apples cherries ',
+       'non-strings halt table addition')
+
+b = lua_stringbuffer.new()
 b:add('apples', 'pears', {'cherries'}, 'kumquats')
 assert(b:getString() == 'applespears',
        'tables are a halting element')
 
-b = StringBuffer.new()
+b = lua_stringbuffer.new()
 b:add{}
 assert(b:getString() == '', 'empty table adds nothing')
 
-b = StringBuffer.new()
-b:add({delimiter = ' ', 'apples', 'cherries'}, {delimiter = ' ', 'pears'})
-assert(b:getString() == 'apples cherries', 'uses only first table')
+b = lua_stringbuffer.new()
+b:add({suffix = ' ', 'apples', 'cherries'}, {suffix = ' ', 'pears'})
+assert(b:getString() == 'apples cherries ', 'uses only first table')
 
 
 
----- TEST DELIMITERS ---------------------------------------------------------
+---- TEST SUFFIXES -----------------------------------------------------------
 
-b = StringBuffer.new('\t')
+b = lua_stringbuffer.new('\t')
 b:add()
 b:add('pickelbarrel')
 b:add('kumquat')
@@ -87,37 +85,42 @@ b:add('')
 assert(b:getString() == '\tpickelbarrel\tkumquat\t\t',
       'constructor accepts global delimiter')
 
-b = StringBuffer.new()
+b = lua_stringbuffer.new()
 b:add('1')
 b:add('2')
-b:setDelimiter('/')
+b:setSuffix('/')
 b:add('3')
 b:add('4')
-b:setDelimiter()
+b:setSuffix()
 b:add('5')
 b:add('6')
-b:setDelimiter('\\') -- -> \
+b:setSuffix('\\') -- -> \
 b:add('7')
 b:add('8')
-b:setDelimiter('')
+b:setSuffix('')
 b:add('9')
 assert(b:getString() == [=[123/4/567\8\9]=],
        'demonstrating setter')
 
-b = StringBuffer.new('  ')
-b:add{delimiter = '\n', 'apples', 'oranges', 'kiwis'}
+b = lua_stringbuffer.new('  ')
+b:add{suffix = '\n', 'apples', 'oranges', 'kiwis'}
+b:setSuffix()
 b:add('citrangelos')
-assert(b:getString() == 'apples\noranges\nkiwis  citrangelos  ',
+assert(b:getString() == 'apples\noranges\nkiwis\n  citrangelos',
        'table-add and preset delimiter interaction')
 
-b = StringBuffer.new()
-b:setDelimiter('  ')
-b:add{delimiter = '\n', 'apples', 'oranges', 'kiwis'}
-b:add('citrangelos')
-assert(b:getString() == 'apples\noranges\nkiwis  citrangelos  ',
-       'more table-add and preset delimiter interaction')
+
+
+---- TEST MODULE CALLS -------------------------------------------------------
+
+b = lua_stringbuffer.new()
+lua_stringbuffer.add(b, 'passionfruit')
+lua_stringbuffer.setSuffix(b, '\n')
+lua_stringbuffer.add(b, {'apples', 'bananas', suffix=', '})
+assert(lua_stringbuffer.getString(b) == 'passionfruitapples, bananas, \n',
+       'less OOP calls for the verbose-inclined')
 
 
 
-print('==== TESTS SUCCESSFUL ====')
+print('==== TEST_STRINGBUFFER SUCCESSFUL ====')
 
