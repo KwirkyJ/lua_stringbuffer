@@ -5,12 +5,12 @@
 --
 -- Author: J. 'KwirkyJ' Smith <kwirkyj.smith0@gmail.com>
 -- Date: 2016
--- Version: 1.0
+-- Version: 1.0.0-0
 -- License: MIT License
 
 
 
-local stringbuffer = {_VERSION = "1.0"}
+local stringbuffer = {_VERSION = "1.0.0-0"}
 
 local bufferobj = {}
 
@@ -71,7 +71,7 @@ end
 
 
 
----StringBuffer.new(delim) OR StringBuffer(delim)
+---StringBuffer.new(delim)
 -- Get a new StringBuffer table/object.
 -- @param delim {String} Optional delimiter to add at the end of each add() call.
 -- @error Raised if delim is not a string or nil.
@@ -82,8 +82,8 @@ stringbuffer.new = function(delim)
     
     return {[1] = {},
             [2] = delim,
-            add = bufferobj.add,
-            getString = bufferobj.getString,
+            add          = bufferobj.add,
+            getString    = bufferobj.getString,
             setDelimiter = bufferobj.setDelimeter,
            }
 end
